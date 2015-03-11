@@ -63,6 +63,29 @@ kbd_init(); 可以看到一共用到了三个外设：CGA、串口和并口。
 
 lab1中printfmt函数用到了可变参，请参考写一个小的linux应用程序，完成实现定义和调用一个可变参数的函数。(spoc)
 - [x]  
+- 
+#include "stdio.h"
+#include "stdarg.h"
+void simple_va_fun(int start, ...)
+{
+    va_list arg_ptr;//存储参数地址的指针
+    int nArgValue =start;
+    int nArgCout=0;     //可变参数的数目
+    va_start(arg_ptr,start); //以固定参数的地址为起点确定变参的内存起始地址。
+    do
+    {
+        ++nArgCout;
+        printf("the %d th arg: %d\n",nArgCout,nArgValue);     //输出各参数的值
+        nArgValue = va_arg(arg_ptr,int);                      //得到下一个可变参数的值
+    } while(nArgValue != -1);               
+    return;
+}
+int main(int argc, char* argv[])
+{
+    simple_va_fun(100,-1);
+    simple_va_fun(100,200,-1);
+       return 0;
+}
 
 
 
@@ -82,7 +105,10 @@ lab1中printfmt函数用到了可变参，请参考写一个小的linux应用程
 如何能获取一个系统调用的调用次数信息？如何可以获取所有系统调用的调用次数信息？请简要说明可能的思路。(spoc)
 - [x]  
 
-> 
+> 执行带-c参数的strace: strace -c ./XXX.exe,
+>
+>执行结果可以清楚的显示调用了那些系统函数，调用次数多少，消耗了多少时间等等这些信息。
+
 
 如何裁减lab1, 实现一个可显示字符串"THU LAB1"且依然能够正确加载ucore OS的bootloader？如果不能完成实现，请说明理由。
 - [x]  
