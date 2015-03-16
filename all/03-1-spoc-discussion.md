@@ -71,7 +71,203 @@ NOTICE
 请参考ucore lab2代码，采用`struct pmm_manager` 根据你的`学号 mod 4`的结果值，选择四种（0:最优匹配，1:最差匹配，2:最先匹配，3:buddy systemm）分配算法中的一种，在应用程序层面来实现，并给出测试用例。 (spoc)
 
 --- 
+> C++ 实现：
+'''
+#include <stdio.h>
+#include <malloc.h>
+#include <iostream>
+using namespace std;
+typedef struct node
+{
+    char* address;
+    int size;
+    struct node *next;
+}node;
 
+class bestmanage
+{
+private:
+    char mem[1024];
+    node * head= NULL;
+    node freelist;
+public:
+    bestmanage()
+    {
+        head = new node;
+        head->address = mem;
+        head->size = 1024;
+        head->next = NULL;
+        freelist.next = head;
+
+    }
+    ~bestmanage(){};
+    
+    char* mng_malloc(int size)
+    {
+        cout<<"malloc! ths size is "<<size<<endl;
+        size = size + sizeof(long long);
+        int min = 1024;
+        node* result = NULL;
+        node* pre_result = NULL;
+        node* pre = NULL;
+        node*temp = freelist.next;
+        while (temp!=NULL)
+        {
+            if (temp->size>=size && (temp->size-size<min))
+            {
+                min = temp->size-size;
+                pre_result = pre;
+                result = temp;
+            }
+            pre = temp;
+            temp= temp->next;
+        }
+        if (result==NULL) 
+        {cout<<"the memory is not fit for this operation :( "<<endl;return NULL;}
+
+        char *address = result->address;
+        if (    result->size == size)
+        {
+
+            pre_result = result->next;
+            free(result);
+        }
+        else
+        {
+            result->size=result->size-size;
+            result->address = result->address+size;
+        }
+        *(int *)address = size;
+        address = address + sizeof(long long);
+        cout<<"Malloc succeed :) "<<endl;
+        return address;
+
+    }
+    void mng_merge()
+    {
+        node *temp = freelist.next;
+        if (temp==NULL) return;
+        node *pre = temp;
+        temp = temp->next;
+        while (temp!=NULL)
+        {
+            if ((long long)pre->address+pre->size==(long long)temp->address)
+            {
+                pre->size=pre->size+temp->size;
+                pre->next = temp->next;
+                free(temp);
+                temp = pre->next;
+            }
+            else
+            {
+                pre=temp;
+                temp=temp->next;
+            }
+        }
+    }
+    
+        
+
+    void mng_free(char*address)
+    {
+        int size = *(int *)(address-sizeof(long long));
+        cout<<"free address "<<(long long)address-sizeof(long long)<<" size: "<<size<<endl;
+        node *newnode = new node;
+        newnode->address =address-sizeof(long long);
+        newnode->next = NULL;
+        newnode->size = size;
+
+        node *temp = freelist.next;
+        node *pre = &freelist;
+        while (temp!=NULL)
+        {
+            if ((long long)temp->address>=(long long)address)
+            {
+                pre->next = newnode;
+                newnode->next = temp;
+                break;
+            }
+            pre = temp;
+            temp= temp->next;
+        }
+        mng_merge();
+
+    }
+    void print()
+    {
+        cout<<"---------freelist info---------"<<endl;
+        node *temp = freelist.next;
+        int n=0;
+        while (temp!=NULL)
+        {
+            n++;
+            cout<<"node("<<n<<")  address: "<<(long long)temp->address<<" size:"<<temp->size<<endl;
+            temp=temp->next;
+        }
+        cout<<"--------------end---------------"<<endl;
+        cout<<endl;
+    }
+    
+};
+
+
+int main()
+{
+    bestmanage mng;
+    char *m1 = mng.mng_malloc(20);
+    char *m2 = mng.mng_malloc(200);
+    char *m3 = mng.mng_malloc(600);
+    mng.print();
+    mng.mng_free(m2);
+    mng.mng_free(m1);
+    mng.print();
+    //char *m4 = mng.mng_malloc(210);
+    mng.print();
+    mng.mng_free(m3);
+    //mng.mng_free(m4);
+    mng.print();
+
+}
+'''
+>运行结果：
+'''
+malloc! ths size is 20
+Malloc succeed :)
+malloc! ths size is 200
+Malloc succeed :)
+malloc! ths size is 600
+Malloc succeed :)
+---------freelist info---------
+node(1)  address: 2293068 size:180
+--------------end---------------
+
+free address 2292252 size: 208
+free address 2292224 size: 28
+---------freelist info---------
+node(1)  address: 2292224 size:236
+node(2)  address: 2293068 size:180
+--------------end---------------
+
+malloc! ths size is 100
+Malloc succeed :)
+---------freelist info---------
+node(1)  address: 2292224 size:236
+node(2)  address: 2293176 size:72
+--------------end---------------
+
+free address 2292460 size: 608
+free address 2293068 size: 108
+---------freelist info---------
+node(1)  address: 2292224 size:1024
+--------------end---------------
+'''
+>解释：
+'''
+    我的学号为2012011354，实现最优匹配算法。
+    用类bestmanage作为管理者，用一个链表freelist来保存空闲分区，bestmanage中有malloc、free、merge等主要函数。
+    由于简化释放时进行的内存合并操作，空闲分区按照地址大小进行排序。同时，如果要求分配大小为n的情况，实际会使用给它n+8字节大小，因为需要来存储使用的长度.
+    因为在64位机上指针的大小为8，不是4，所以要用sizeof(long long),如果用sizeof(int)会报错 :(
+'''
 ## 扩展思考题
 
 阅读[slab分配算法](http://en.wikipedia.org/wiki/Slab_allocation)，尝试在应用程序中实现slab分配算法，给出设计方案和测试用例。
