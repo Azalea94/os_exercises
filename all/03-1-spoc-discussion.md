@@ -219,7 +219,8 @@ int main()
     mng.print();
 }
 ```
->运行结果：
+> 运行结果：
+
 ```
 malloc! ths size is 20
 Malloc succeed :)
@@ -229,29 +230,28 @@ malloc! ths size is 600
 Malloc succeed :)
 ---------freelist info---------
 node(1)  address: 2293068 size:180
---------------end---------------
-
+--------------end--------------- 
 free address 2292252 size: 208
 free address 2292224 size: 28
 ---------freelist info---------
 node(1)  address: 2292224 size:236
 node(2)  address: 2293068 size:180
 --------------end---------------
-
 malloc! ths size is 100
 Malloc succeed :)
 ---------freelist info---------
 node(1)  address: 2292224 size:236
 node(2)  address: 2293176 size:72
 --------------end---------------
-
 free address 2292460 size: 608
 free address 2293068 size: 108
 ---------freelist info---------
 node(1)  address: 2292224 size:1024
 --------------end---------------
+
 ```
 >解释：
+
 ```
     我的学号为2012011354，实现最优匹配算法。
     用类bestmanage作为管理者，用一个链表freelist来保存空闲分区，bestmanage中有malloc、free、merge等主要函数。
