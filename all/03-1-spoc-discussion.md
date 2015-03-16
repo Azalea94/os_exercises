@@ -72,7 +72,8 @@ NOTICE
 
 --- 
 > C++ 实现：
-'''
+
+```
 #include <stdio.h>
 #include <malloc.h>
 #include <iostream>
@@ -98,7 +99,6 @@ public:
         head->size = 1024;
         head->next = NULL;
         freelist.next = head;
-
     }
     ~bestmanage(){};
     
@@ -128,7 +128,6 @@ public:
         char *address = result->address;
         if (    result->size == size)
         {
-
             pre_result = result->next;
             free(result);
         }
@@ -141,7 +140,6 @@ public:
         address = address + sizeof(long long);
         cout<<"Malloc succeed :) "<<endl;
         return address;
-
     }
     void mng_merge()
     {
@@ -165,9 +163,6 @@ public:
             }
         }
     }
-    
-        
-
     void mng_free(char*address)
     {
         int size = *(int *)(address-sizeof(long long));
@@ -176,7 +171,6 @@ public:
         newnode->address =address-sizeof(long long);
         newnode->next = NULL;
         newnode->size = size;
-
         node *temp = freelist.next;
         node *pre = &freelist;
         while (temp!=NULL)
@@ -191,7 +185,6 @@ public:
             temp= temp->next;
         }
         mng_merge();
-
     }
     void print()
     {
@@ -207,9 +200,7 @@ public:
         cout<<"--------------end---------------"<<endl;
         cout<<endl;
     }
-    
 };
-
 
 int main()
 {
@@ -221,16 +212,15 @@ int main()
     mng.mng_free(m2);
     mng.mng_free(m1);
     mng.print();
-    //char *m4 = mng.mng_malloc(210);
+    char *m4 = mng.mng_malloc(210);
     mng.print();
     mng.mng_free(m3);
-    //mng.mng_free(m4);
+    mng.mng_free(m4);
     mng.print();
-
 }
-'''
+```
 >运行结果：
-'''
+```
 malloc! ths size is 20
 Malloc succeed :)
 malloc! ths size is 200
@@ -260,14 +250,14 @@ free address 2293068 size: 108
 ---------freelist info---------
 node(1)  address: 2292224 size:1024
 --------------end---------------
-'''
+```
 >解释：
-'''
+```
     我的学号为2012011354，实现最优匹配算法。
     用类bestmanage作为管理者，用一个链表freelist来保存空闲分区，bestmanage中有malloc、free、merge等主要函数。
     由于简化释放时进行的内存合并操作，空闲分区按照地址大小进行排序。同时，如果要求分配大小为n的情况，实际会使用给它n+8字节大小，因为需要来存储使用的长度.
     因为在64位机上指针的大小为8，不是4，所以要用sizeof(long long),如果用sizeof(int)会报错 :(
-'''
+```
 ## 扩展思考题
 
 阅读[slab分配算法](http://en.wikipedia.org/wiki/Slab_allocation)，尝试在应用程序中实现slab分配算法，给出设计方案和测试用例。
