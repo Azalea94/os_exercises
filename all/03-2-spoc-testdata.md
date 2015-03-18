@@ -20,7 +20,7 @@ page 0d: 09 08 01 00 04 0c 1c 13 07 15 08 0f 09 1d 0a 18 13 1a 12 1a 0c 15 13 10
 page 0e: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
 page 0f: 7f 7f 7f f1 7f 7f 7f b4 7f 7f ca c2 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 
 page 10: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
-page 11: da f7 f2 a8 96 c5 9d 94 c8 b9 7f c4 98 e5 7f 7f d3 a1 82 8f a6 fb bf f0 7f 84 d2 a0 88 80 c9 92 
+page 11: da f7 f2 a8 96 c5 9d 94 c8 b9 7f c4 98 e5 7f 7f d3 a1 82 8f a6 fb bf f0 7f 84 d2 a0 88 80 c9 92  
 page 12: 7f 7f dd 7f 7f 7f 7f 7f 7f 7f 7f 95 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 
 page 13: 1c 00 04 14 01 0b 04 0e 1a 1c 01 01 1a 01 08 03 02 00 13 17 15 1a 14 0c 13 1e 13 07 01 1c 12 0a 
 page 14: 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f ad 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 
@@ -150,7 +150,7 @@ Virtual Address 748b
 比如答案可以如下表示：
 ```
 Virtual Address 7570:
-  --> pde index:0x1d  pde contents:(valid 1, pfn 0x33)
+  --> pde index:0x1d  pde contents:(valid 1, pfn 0x)
     --> pte index:0xb  pte contents:(valid 0, pfn 0x7f)
       --> Fault (page table entry not valid)
       
@@ -163,3 +163,19 @@ Virtual Address 7268:
     --> pte index:0x13  pte contents:(valid 1, pfn 0x65)
       --> Translates to Physical Address 0xca8 --> Value: 16
 ```
+
+Virtual Address 6c74:
+  --> pde index:0xa0  pde contents:(valid 1, pfn 0x20)
+    --> pte index:0x03  pte contents:(valid 1, pfn 0x61)
+      --> Fault (page table entry not valid)
+11011 00011 10100
+
+317a 
+--> pde index:0x1a pde contents:(valid 1, pfn 0x52) 
+    --> pte index:0x17 pte contents:(valid 0, pfn 0x7f) 
+        --> Fault
+ 01100 01011 11010 24
+4546 
+--> pde index:0x1a pde contents:(valid 1, pfn 0x21) --> pte index:0x0a pte contents:(valid 0, pfn 0x7f) --> Fault
+
+2c03 --> pde index:01011 pde contents:(valid 1, pfn 0x44) --> pte index:00000 pte contents:(valid 1, pfn 0x57) --> offset:00011 --> Value : 16

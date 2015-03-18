@@ -17,12 +17,23 @@ NOTICE
   + 采分点：说明64bit CPU架构的分页机制的大致特点和页表执行过程
   - 答案没有涉及如下3点；（0分）
   - 正确描述了64bit CPU支持的物理内存大小限制（1分）
-  - 正确描述了64bit CPU下的多级页表的级数和多级页表的结构或反置页表的结构（2分）
+  - 正确描述了64bit PU下的多级页表的级数和多级页表的结构或反置页表的结构（2分）
   - 除上述两点外，进一步描述了在多级页表或反置页表下的虚拟地址-->物理地址的映射过程（3分）
- ```
+```
 - [x]  
 
->  
+> 分页机制：
+> >
+> >  64bit 最大虚拟内存大小为2^64 byte；
+> >  
+> >  页的大小可以不同，但普通页的大小采用4KB的标准，并且保证页地址边界对齐，即每一页的起始地址都应被4K整除。通过页表得到逻辑地址向物理地址的映射关系。
+> 
+> 页表：
+> >  为了减小页表所占空间，采用多级页表的处理方式，对于大地址空间，如64位页表级数较大，比如5级。多级页表将页号分成k级，如p1,p2,p3，先通过CR3寄存器和p1找到第一级页表的页表项，再进行p2大小的偏移找到第二级页表的页表项，同理找到第三极页表的页表项，找到对应的物理地址。这样可以减少每一级页表的大小。
+> 
+> 反置页表：
+> >  让页表与物理地址空间的大小相对应。页寄存器对应物理页帧，对逻辑地址进行hash映射，利用快表查找对应页表项，有冲突时便利冲突项链表，如果查找失败引发异常。
+>
 
 ## 小组思考题
 ---
@@ -31,7 +42,9 @@ NOTICE
 
 - [x]  
 
-> 500=0.9\*150+0.1\*x
+> 500=0.9*150+0.1*x
+> 
+> x = 3650ns
 
 （2）(spoc) 有一台假想的计算机，页大小（page size）为32 Bytes，支持32KB的虚拟地址空间（virtual address space）,有4KB的物理内存空间（physical memory），采用二级页表，一个页目录项（page directory entry ，PDE）大小为1 Byte,一个页表项（page-table entries
 PTEs）大小为1 Byte，1个页目录表大小为32 Bytes，1个页表大小为32 Bytes。页目录基址寄存器（page directory base register，PDBR）保存了页目录表的物理地址（按页对齐）。
@@ -65,6 +78,7 @@ Virtual Address 748b
 ```
 
 比如答案可以如下表示：
+
 ```
 Virtual Address 7570:
   --> pde index:0x1d  pde contents:(valid 1, pfn 0x33)
@@ -81,10 +95,95 @@ Virtual Address 7268:
       --> Translates to Physical Address 0xca8 --> Value: 16
 ```
 
+> 答案：
+
+```
+Virtual Address 0x6c74
+ --> pde index:0x1b  pde contents:(valid 1, pfn 0x20)
+   --> pte index:0x3  pte contents:(valid 1, pfn 0x61)
+      --> Translates to Physical Address 0xc34--> Value: 06
+Virtual Address 0x6b22
+ --> pde index:0x1a  pde contents:(valid 1, pfn 0x52)
+   --> pte index:0x19  pte contents:(valid 1, pfn 0x47)
+      --> Translates to Physical Address 0x8e2--> Value: 1a
+Virtual Address 0x3df
+ --> pde index:0x0  pde contents:(valid 1, pfn 0x5a)
+   --> pte index:0x1e  pte contents:(valid 1, pfn 0x5)
+      --> Translates to Physical Address 0xbf--> Value: 0f
+Virtual Address 0x69dc
+ --> pde index:0x1a  pde contents:(valid 1, pfn 0x52)
+   --> pte index:0xe  pte contents:(valid 0, pfn 0x7f)
+     --> Fault (page directory entry not valid)
+Virtual Address 0x317a
+ --> pde index:0xc  pde contents:(valid 1, pfn 0x18)
+   --> pte index:0xb  pte contents:(valid 1, pfn 0x35)
+      --> Translates to Physical Address 0x6ba--> Value: 1e
+Virtual Address 0x4546
+ --> pde index:0x11  pde contents:(valid 1, pfn 0x21)
+   --> pte index:0xa  pte contents:(valid 0, pfn 0x7f)
+     --> Fault (page directory entry not valid)
+Virtual Address 0x2c03
+ --> pde index:0xb  pde contents:(valid 1, pfn 0x44)
+   --> pte index:0x0  pte contents:(valid 1, pfn 0x57)
+      --> Translates to Physical Address 0xae3--> Value: 16
+Virtual Address 0x7fd7
+ --> pde index:0x1f  pde contents:(valid 1, pfn 0x12)
+   --> pte index:0x1e  pte contents:(valid 0, pfn 0x7f)
+     --> Fault (page directory entry not valid)
+Virtual Address 0x390e
+ --> pde index:0xe  pde contents:(valid 0, pfn 0x7f)
+   --> Fault (page directory entry not valid)
+Virtual Address 0x748b
+ --> pde index:0x1d  pde contents:(valid 1, pfn 0x0)
+   --> pte index:0x4  pte contents:(valid 0, pfn 0x7f)
+     --> Fault (page directory entry not valid)
+[Finished in 0.3s]
+```
+
 
 
 （3）请基于你对原理课二级页表的理解，并参考Lab2建页表的过程，设计一个应用程序（可基于python, ruby, C, C++，LISP等）可模拟实现(2)题中描述的抽象OS，可正确完成二级页表转换。
+```
+problem = ['6c74', '6b22', '03df','69dc', '317a', '4546','2c03', '7fd7', '390e', '748b']
+data = []
 
+def compute(problem):
+    base = data[17]
+    print('Virtual Address ' + str(hex(problem)))
+    pde_content = int(base[int(problem/1024)],16)
+    pde_valid = int(pde_content/128);
+    pdepfn = int(pde_content - pde_valid*128)
+    print(' --> pde index:'+ str(hex(int(problem/1024))) + \
+        '  pde contents:(valid '+str(pde_valid)+', pfn '+str(hex(pdepfn))+')')
+    problem = problem%1024
+    if pde_valid == 0:
+        print('   --> Fault (page directory entry not valid)')
+        return
+    pte_data = data[pdepfn]
+    pte_content = int(pte_data[int(problem/32)],16)
+    pte_valid = int(pte_content / 128);
+    ptepfn = pte_content - pte_valid*128
+    print('   --> pte index:'+str(hex(int(problem/32))) + \
+        '  pte contents:(valid '+str(pte_valid)+', pfn '+str(hex(ptepfn)+')'))
+    problem = problem%32
+    if pte_valid == 0:
+        print('     --> Fault (page directory entry not valid)')
+        return
+
+    final_data = data[ptepfn]
+    final_content = final_data[problem]
+    final = ptepfn * 32 + problem
+    print('      --> Translates to Physical Address ' + str(hex(final)) + '--> Value: ' + final_content)
+
+fread = open('data.txt','r')
+data_ = fread.read().split('\n')
+fread.close()
+for one in data_:
+    data.append(one.split())
+for one in problem:
+    compute(int(one,16))
+
+```
 
 （4）假设你有一台支持[反置页表](http://en.wikipedia.org/wiki/Page_table#Inverted_page_table)的机器，请问你如何设计操作系统支持这种类型计算机？请给出设计方案。
 
