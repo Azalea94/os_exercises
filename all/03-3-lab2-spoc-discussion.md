@@ -151,7 +151,7 @@ def translate(va_str,pa_str):
 		fwrite.write (strings[i]+' 0x%08x ' %vals[i],)
 		i= i+1
 	fwrite.write('\n')
-fread = open('data.in','r')
+fread = open('data','r')
 while True:
 	problem = fread.readline()
 	if problem:
