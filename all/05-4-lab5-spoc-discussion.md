@@ -108,7 +108,6 @@ sys_exec , i will create a user program!
      set current process's mm, sr3, and set CR3 reg 
      setup trapframe for user environment 
 +++++alloc resource end++++
-
 ++++++switch from kernel ring0 to user ring3!++++//分析：在进行完用户进程资源分配之后，还需要进行特权级的转换，为用户进程设置对应寄存器的值。
       switch cs
       switch ds es ss
@@ -118,8 +117,9 @@ sys_exec , i will create a user program!
 ++++++switch from kernel ring0 to user ring3! end ++++  
 ```
 
-```  
+
 //分析：以下就开始运行用户进程了
+```
 I am the parent. Forking the child...//分析：这是用户进程中的一句输出，表示的是用户进程2是父进程，将进行fork操作
 
 
@@ -129,8 +129,10 @@ I am the parent. Forking the child...//分析：这是用户进程中的一句�
 ++++syscall fork end,from kernel to user
 //分析：fork完一个新进程，回到父进程，输出创建的子进程的编号
 I am parent, fork a child pid 3
+```
 
 //分析：以下是第二个进程的复制创建，过程与上一个类似。
+```
 ++++syscall fork ,from user to kernel
      do_fork, fork ring is 3
      wake up 4
@@ -148,8 +150,9 @@ I am the parent, waiting now..
 ++++syscall fork end,from kernel to user  
 ```
 
-```
+
 //分析：以下开始两个子进程的交替运行，每次运行一步后，通过系统调用yield，转换到内核态，运行schdule，进行两个进程之间的互相调度。
+```
 I am the child 4. step0
 
 ++++++syscall yield,switch user to kernel //分析：这是第一次调用的过程
@@ -214,8 +217,9 @@ I am the child 3. step2
 ++++++4 exit ,recource release end!++++++  
 ```
 
-```
+
 //分析：进程4回收后，调度到进程3
+```
      wake up 2
      from 4 to 3 schedule
      switch kstack
